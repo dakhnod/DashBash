@@ -1,7 +1,7 @@
 # DashBash
 Amazon Dash button hack using an ESP8266.
 
-This is a simple sketch for the ESP8266 using the ESP library version 2.4.2.
+This is a simple Arduino sketch for the ESP8266 using the ESP library version 2.4.2.
 
 All the code does is sniff WiFi probe requests and alarm when it recognizes 
 a mac address and the sequence number for those packets starts new,
