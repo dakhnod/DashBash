@@ -1,5 +1,5 @@
 # DashBash
-Amazon Dash button press hack using an ESP8266.
+Amazon Dash button hack using an ESP8266.
 
 This is a simple sketch for the ESP8266 using the ESP library version 2.4.2.
 
