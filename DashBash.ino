@@ -36,10 +36,6 @@ int targetLookUp(uint8_t* mac) { // find the index of a stored button mac addres
 
 void setup() {
   Serial.begin(9600);
-
-  //for (int i = 0; i < (sizeof(targets) / sizeof(targets[0])); i++) {
-  //  seqNumbers[i] = ~0; // uint16_t max value
-  //}
   memset(seqNumbers, ~0, sizeof(seqNumbers)); // set all lastSequence-entries to MAX 
 
   wifi_set_opmode(STATION_MODE); //promiscous mode setup
