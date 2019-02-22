@@ -1,4 +1,9 @@
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+
+#define WIFI_SSID "XXXXXX"
+#define WIFI_PASS "xxxxxx"
+#define HTTP_ENDPOINT "http://example.com/"
 
 extern "C" {
 #include "user_interface.h"
@@ -12,22 +17,48 @@ unsigned int channel = 1;
 
 const uint8_t targets[][6] = { // collection of target macs, find the mac address by e.g. airodump-ng
   {0x6c, 0x56, 0x97, 0x0a, 0xd4, 0x17},
-//{0x01, 0x02, 0x03, 0x04, 0x05, 0x06},
-//...
+  //{0x01, 0x02, 0x03, 0x04, 0x05, 0x06},
+  //...
 };
 uint16_t seqNumbers[sizeof(targets) / sizeof(targets[0])]; // last packet sequence number store
 int pressedButton = -1; // flag indicating the last pressed button
 
 void receiveCallback(uint8_t*, uint16_t);
-inline void serial(uint8_t);
 void onButtonPress(uint8_t);
 
-void onButtonPress(uint8_t buttonIndex) { // callback for received button press
-  //Serial.write(buttonIndex); // write pressed button index to Serial, could be replaced with pin toggle etc.
-  digitalWrite(LED_BUILTIN, LOW); //flash LED
-  delay(500);
+// this method gets called when a butotn press is detected and the ESP is connected to a WiFi
+// after the execution of this function the ESP goes back to promiscous mode
+void onWifiConnected() {
+  HTTPClient http;
+  http.begin(HTTP_ENDPOINT);
+  http.GET();
+  http.end();
+}
+
+void setupPromiscous() {
+  WiFi.disconnect();
+  wifi_set_opmode(STATION_MODE); //promiscous mode setup
+  wifi_set_channel(channel);
+  wifi_promiscuous_enable(false);
+  wifi_set_promiscuous_rx_cb(receiveCallback);
+  wifi_promiscuous_enable(true);
   digitalWrite(LED_BUILTIN, HIGH);
-  //Serial.println("button: " + String(data));
+}
+
+void setupWifi() {
+  wifi_promiscuous_enable(false);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+  while (WiFi.status() != WL_CONNECTED) {
+    digitalWrite(LED_BUILTIN, millis() / 100 & 1);
+    yield();
+  }
+  digitalWrite(LED_BUILTIN, LOW);
+}
+
+void onButtonPress(uint8_t buttonIndex) { // callback for received button press
+  setupWifi();
+  onWifiConnected();
+  setupPromiscous();
 }
 
 int targetLookUp(uint8_t* mac) { // find the index of a stored button mac address
@@ -38,18 +69,11 @@ int targetLookUp(uint8_t* mac) { // find the index of a stored button mac addres
 }
 
 void setup() {
-  //Serial.begin(9600);
-  memset(seqNumbers, ~0, sizeof(seqNumbers)); // set all lastSequence-entries to MAX 
-
-  wifi_set_opmode(STATION_MODE); //promiscous mode setup
-  wifi_set_channel(channel);
-  wifi_promiscuous_enable(false);
-  wifi_set_promiscuous_rx_cb(receiveCallback);
-  wifi_promiscuous_enable(true);
+  memset(seqNumbers, ~0, sizeof(seqNumbers)); // set all lastSequence-entries to MAX
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
-}
 
+  setupPromiscous();
+}
 
 void loop() {
   if (pressedButton > -1) { // check if buttonPressed-flag is set
@@ -63,9 +87,9 @@ void receiveCallback(uint8_t *buf, uint16_t len)
   if (pressedButton == -1 && len == 128) {
     uint8_t* const macAddress = buf + 22;
     int buttonIndex = targetLookUp(macAddress);
-    
+
     if (buttonIndex < 0) return; // mac not found
-    
+
     int seqHigh = buf[35];
     int seqLow  = buf[34];
     int sequenceNumber = (seqHigh << 4) | (seqLow >> 4);
