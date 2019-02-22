@@ -37,6 +37,7 @@ void onWifiConnected() {
 
 void setupPromiscous() {
   WiFi.disconnect();
+  yield();
   wifi_set_opmode(STATION_MODE); //promiscous mode setup
   wifi_set_channel(channel);
   wifi_promiscuous_enable(false);
@@ -90,13 +91,13 @@ void receiveCallback(uint8_t *buf, uint16_t len)
 
     if (buttonIndex < 0) return; // mac not found
 
-    int seqHigh = buf[35];
+    /*int seqHigh = buf[35];
     int seqLow  = buf[34];
     int sequenceNumber = (seqHigh << 4) | (seqLow >> 4);
     int lastSeq = seqNumbers[buttonIndex];
-    seqNumbers[buttonIndex] = sequenceNumber;
-    if (sequenceNumber < lastSeq) { // check if sequence numbering started new
+    seqNumbers[buttonIndex] = sequenceNumber;*/
+    //if (sequenceNumber < lastSeq) { // check if sequence numbering started new
       pressedButton = buttonIndex;
-    }
+    //}
   }
 }
