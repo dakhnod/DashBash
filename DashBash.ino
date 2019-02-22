@@ -23,7 +23,10 @@ inline void serial(uint8_t);
 void onButtonPress(uint8_t);
 
 void onButtonPress(uint8_t buttonIndex) { // callback for received button press
-  Serial.write(buttonIndex); // write pressed button index to Serial, could be replaced with pin toggle etc.
+  //Serial.write(buttonIndex); // write pressed button index to Serial, could be replaced with pin toggle etc.
+  digitalWrite(LED_BUILTIN, LOW); //flash LED
+  delay(500);
+  digitalWrite(LED_BUILTIN, HIGH);
   //Serial.println("button: " + String(data));
 }
 
@@ -35,7 +38,7 @@ int targetLookUp(uint8_t* mac) { // find the index of a stored button mac addres
 }
 
 void setup() {
-  Serial.begin(9600);
+  //Serial.begin(9600);
   memset(seqNumbers, ~0, sizeof(seqNumbers)); // set all lastSequence-entries to MAX 
 
   wifi_set_opmode(STATION_MODE); //promiscous mode setup
@@ -43,6 +46,8 @@ void setup() {
   wifi_promiscuous_enable(false);
   wifi_set_promiscuous_rx_cb(receiveCallback);
   wifi_promiscuous_enable(true);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 
