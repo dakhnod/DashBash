@@ -14,3 +14,5 @@ I haven't tested otherwise, but ensure that the button can properly connect to t
 That way, if the button is not able to connect to a hotspot, it will send those precious probe requests
 and shut down after about two seconds,
 saving quite some energy compared to it connecting and trying to reach Amazon servers a few times.
+
+If you simply want to test whether the ESP is receiving the Probe Frames, check out the [test-led](https://github.com/dakhnod/DashBash/tree/test-led) branch
